@@ -69,7 +69,6 @@ public class NewPayment extends AppCompatActivity {
             }
         } else {
             timestamp.setText("");
-            System.out.println("Here");
         }
     }
 
