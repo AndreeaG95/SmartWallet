@@ -23,9 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+ * This class holds the data for the new activity that is created in order to
+ * modify an existing entry in the database, delete one or create a new one.
+*/
 public class NewPayment extends AppCompatActivity {
 
-    // UI.
     private Spinner spinner;
     private EditText name, price;
     private TextView timestamp;
@@ -33,6 +36,7 @@ public class NewPayment extends AppCompatActivity {
     final List<String> paymentTypes = new ArrayList<>();
     private Payment payment;
     private DatabaseReference databaseReference;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,7 @@ public class NewPayment extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         databaseReference = database.getReference();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, paymentTypes);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, paymentTypes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -62,7 +66,7 @@ public class NewPayment extends AppCompatActivity {
         if (payment != null) {
             name.setText(payment.getName());
             price.setText(String.valueOf(payment.getCost()));
-            timestamp.setText("Time of payment:  " + payment.timestamp + "ana");
+            timestamp.setText("Timestamp:  " + payment.timestamp);
             try {
                 spinner.setSelection(paymentTypes.indexOf(payment.getType()));
             } catch (Exception e) {
@@ -94,7 +98,7 @@ public class NewPayment extends AppCompatActivity {
     private void delete(String timestamp) {
         AppState.get().getDatabaseReference().child("wallet").child(timestamp).removeValue();
 
-        // finishes the current activity and returns to the last activity on the stack
+        // Finishes the current activity and returns to the last activity on the stack.
         finish();
     }
 
@@ -107,9 +111,9 @@ public class NewPayment extends AppCompatActivity {
                     saveAndClose(getCurrentTimeDate());
                 break;
             case R.id.bDelete:
-                if (payment != null)
+                if (payment != null) {
                     delete(payment.timestamp);
-                else
+                }else
                     Toast.makeText(this, "Payment does not exist", Toast.LENGTH_SHORT).show();
                 break;
         }

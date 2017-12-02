@@ -1,6 +1,8 @@
 package com.upt.cti.smartwallet;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +28,9 @@ import UI.PaymentType;
 
 public class Lab6 extends AppCompatActivity {
 
-    //  UI.
+    /*
+    * UI.
+    */
     private TextView tStatus;
     private Button bPrevious, bNext;
     private FloatingActionButton fabAdd;
@@ -34,6 +38,7 @@ public class Lab6 extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
     private List<Payment> payments = new ArrayList<>();
+    private int currentMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +54,29 @@ public class Lab6 extends AppCompatActivity {
         final PaymentAdapter adapter = new PaymentAdapter(this, R.layout.item_payment, payments);
         listPayments.setAdapter(adapter);
 
+        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
+        //currentMonth = prefs.getInt(TAG_MONTH, -1);
+       // if (currentMonth == -1)
+        //    currentMonth = Month.monthFromTimestamp(AppState.getCurrentTimeDate());
+
+        if (!AppState.isNetworkAvailable(this)) {
+            // has local storage already
+            if (AppState.get().hasLocalStorage(this)) {
+              //  payments = /**/
+                        //tStatus.setText("Found " + payments.size() + " payments for " + Month.intToMonthName(currentMonth) + ".");
+            } else {
+                Toast.makeText(this, "This app needs an internet connection!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         databaseReference = database.getReference();
         AppState.get().setDatabaseReference(databaseReference);
 
+        /*
+        * Populate the listview with the data from firebase.
+        */
         databaseReference.child("wallet").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -64,7 +88,6 @@ public class Lab6 extends AppCompatActivity {
                     } catch (Exception e) {
                     }
                     adapter.notifyDataSetChanged();
-
             }
 
             @Override
@@ -88,6 +111,11 @@ public class Lab6 extends AppCompatActivity {
             }
         });
 
+        /*
+        *  Open new activity from a selected item from the listview.
+        *  This item can be deleted or edited.
+        *  We use a singleton pattern the get the state of the objects in the new activity.
+        */
         listPayments.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -98,7 +126,9 @@ public class Lab6 extends AppCompatActivity {
         });
     }
 
-    // Launch create payment activity.
+    /*
+    * Launch create payment activity.
+    */
     public void newPayment(View v)
     {
         AppState.get().setCurrentPayment(null);
