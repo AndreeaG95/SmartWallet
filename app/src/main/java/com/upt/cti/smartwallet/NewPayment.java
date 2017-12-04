@@ -61,7 +61,7 @@ public class NewPayment extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        // initialize UI if editing
+        // Initialize UI if editing.
         payment = AppState.get().getCurrentPayment();
         if (payment != null) {
             name.setText(payment.getName());
@@ -81,11 +81,15 @@ public class NewPayment extends AppCompatActivity {
         // TODO: validate input.
         Payment newPay = new Payment(name.getText().toString(), spinner.getSelectedItem().toString(), Double.parseDouble(price.getText().toString()));
 
-        DatabaseReference walletRef = databaseReference.child("wallet").child(getCurrentTimeDate());
+        DatabaseReference walletRef = databaseReference.child("wallet").child(timestamp);
         walletRef.setValue(newPay);
+
+        // Backup data locally.
+        //AppState.updateLocalBackup(this, newPay, null);
 
         // Go back to main screen.
         Intent intent = new Intent(getApplicationContext(), Lab6.class);
+        finish();
         startActivity(intent);
     }
 
@@ -97,9 +101,13 @@ public class NewPayment extends AppCompatActivity {
 
     private void delete(String timestamp) {
         AppState.get().getDatabaseReference().child("wallet").child(timestamp).removeValue();
+        // Backup data locally.
+       // AppState.updateLocalBackup(this, null, timestamp);
 
-        // Finishes the current activity and returns to the last activity on the stack.
+        // Go back to main activity.
+        Intent intent = new Intent(getApplicationContext(), Lab6.class);
         finish();
+        startActivity(intent);
     }
 
     public void click(View view){
